@@ -86,9 +86,6 @@ def get_encoded_embeddings(logs_path):
     x = detection_graph.get_tensor_by_name('inputs:0')
     encoded = detection_graph.get_tensor_by_name('encoder/encoded/LeakyRelu:0')
 
-    # embedding = sess.run(encoded, feed_dict={x: frame})
-    # embedding = embedding.reshape((1, embedding.shape[0], embedding.shape[1]))
-
     return x, encoded
 
 
@@ -140,8 +137,6 @@ def predictSign(paths):
                                                                           tf.nn.top_k(prediction, k=5)],
                                                                          feed_dict=feed)
 
-            # addLogs(probabilities_1[1][0], probabilities_3[1][0], probabilities_5[1][0], batch_y - 1)
-
             print("Expected value : ", batch_y - 1)
             print(probabilities_1[1][0])
             print(probabilities_3[1][0])
@@ -149,29 +144,5 @@ def predictSign(paths):
 
             predictions.append(probabilities_5[1][0])
 
-            # printResults(
-            #     probabilities_1[1][0], probabilities_3[1][0], probabilities_5[1][0], batch_y - 1)
-
-            # if batch_y - 1 in probabilities_1[1][0]:
-            #     accuracy_1 = accuracy_1 + 1
-
-            # if batch_y - 1 in probabilities_3[1][0]:
-            #     accuracy_3 = accuracy_3 + 1
-
-            # if batch_y - 1 in probabilities_5[1][0]:
-            #     accuracy_5 = accuracy_5 + 1
-
-            # loop_count += 1
-
-            # if(loop_count % 100 == 0):
-            #     logResult(accuracy_1, accuracy_3, accuracy_5)
         return predictions
-    #         print("==============================",
-    #               "=================================")
-    # print('total test data : ', 100)
-    # print('accaracy of prediction[0]: ', accuracy_1,
-    #       '', 'accuaracy', 100 * accuracy_1 / 100)
-    # print('accaracy of prediction[0-2]: ',
-    #       accuracy_3, 'accuaracy', 100 * accuracy_3 / 100)
-    # print('accaracy of prediction[0 -4]: ',
-    #       accuracy_5, 'accuaracy', 100 * accuracy_5 / 100)
+
