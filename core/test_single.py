@@ -10,10 +10,6 @@ from tensorflow.python.platform import gfile
 from utils import utility, os_utils, cv_utils
 from sklearn.preprocessing import OneHotEncoder
 
-accuracy_1 = 0
-accuracy_3 = 0
-accuracy_5 = 0
-
 
 def get_batch(video_path, all_frame):
     # batch_x = cv_utils.prepare_batch_frames(video_path, all_frame=all_frame)
@@ -96,74 +92,81 @@ def get_encoded_embeddings(logs_path):
     return x, encoded
 
 
-BATCH_SIZE = 1
-encoder_logs_path = cs.BASE_LOG_PATH + cs.MODEL_CONV_AE_1
-bi_lstm_logs_path = cs.BASE_LOG_PATH + cs.MODEL_BI_LSTM
-path_generator = os_utils.iterate_test_data(
-    cs.BASE_DATA_PATH + cs.DATA_BG_TEST_VIDEO, "mp4")
+def predictSign(paths):
+    BATCH_SIZE = 1
+    encoder_logs_path = cs.BASE_LOG_PATH + cs.MODEL_CONV_AE_1
+    bi_lstm_logs_path = cs.BASE_LOG_PATH + cs.MODEL_BI_LSTM
+    path_generator = os_utils.iterate_test_data(
+        cs.BASE_DATA_PATH + cs.DATA_BG_TEST_VIDEO, "mp4")
 
-graph = tf.Graph()
+    graph = tf.Graph()
 
-# accuracy_1 = 0
-# accuracy_3 = 0
-# accuracy_5 = 0
+    with graph.as_default():
+        rnn = Bi_LSTM(lstm_size=128, batch_len=BATCH_SIZE,
+                      output_nodes=14, keep_prob=0.0, learning_rate=0.001)
+        rnn.build_model()
+        stage_1_ip, stage_2_ip = get_encoded_embeddings(encoder_logs_path)
+        prediction = tf.nn.softmax(rnn.predictions)
+        saver = tf.train.Saver()
 
-with graph.as_default():
-    rnn = Bi_LSTM(lstm_size=128, batch_len=BATCH_SIZE,
-                  output_nodes=14, keep_prob=0.0, learning_rate=0.001)
-    rnn.build_model()
-    stage_1_ip, stage_2_ip = get_encoded_embeddings(encoder_logs_path)
-    prediction = tf.nn.softmax(rnn.predictions)
-    saver = tf.train.Saver()
+    label_encoder, num_classes = get_label_enocder(path_generator)
+    path_generator = os_utils.iterate_test_data(
+        cs.BASE_DATA_PATH + cs.DATA_BG_TEST_VIDEO, "mp4")
 
-label_encoder, num_classes = get_label_enocder(path_generator)
+    with tf.Session(graph=graph) as sess:
+        saver.restore(sess, tf.train.latest_checkpoint(bi_lstm_logs_path))
+        state_fw = sess.run(rnn.initial_state_fw)
+        state_bw = sess.run(rnn.initial_state_bw)
+        loop_count = 0
+        predictions = []
+        for video_path in paths:
+            batch_x = get_batch(video_path, True)
+            batch_y = get_target_name(video_path)
 
-with tf.Session(graph=graph) as sess:
-    saver.restore(sess, tf.train.latest_checkpoint(bi_lstm_logs_path))
-    state_fw = sess.run(rnn.initial_state_fw)
-    state_bw = sess.run(rnn.initial_state_bw)
-    loop_count = 0
+            encoded_batch = sess.run(stage_2_ip, feed_dict={
+                                     stage_1_ip: batch_x})
+            encoded_batch = encoded_batch.reshape(
+                (1, encoded_batch.shape[0], encoded_batch.shape[1]))
 
+            feed = {rnn.inputs_: encoded_batch,
+                    rnn.targets_: label_encoder.transform([batch_y]),
+                    rnn.keep_prob: 0.5,
+                    rnn.initial_state_fw: state_fw,
+                    rnn.initial_state_bw: state_bw}
 
-def predictVideo(video_path):
+            probabilities_1, probabilities_3, probabilities_5 = sess.run([tf.nn.top_k(prediction, k=1),
+                                                                          tf.nn.top_k(
+                                                                              prediction, k=3),
+                                                                          tf.nn.top_k(prediction, k=5)],
+                                                                         feed_dict=feed)
 
-    print(video_path)
-    batch_x = get_batch(video_path, True)
-    batch_y = get_target_name(video_path)
+            # addLogs(probabilities_1[1][0], probabilities_3[1][0], probabilities_5[1][0], batch_y - 1)
 
-    encoded_batch = sess.run(stage_2_ip, feed_dict={
-        stage_1_ip: batch_x})
-    encoded_batch = encoded_batch.reshape(
-        (1, encoded_batch.shape[0], encoded_batch.shape[1]))
+            print("Expected value : ", batch_y - 1)
+            print(probabilities_1[1][0])
+            print(probabilities_3[1][0])
+            print(probabilities_5[1][0])
 
-    feed = {rnn.inputs_: encoded_batch,
-            rnn.targets_: label_encoder.transform([batch_y]),
-            rnn.keep_prob: 0.5,
-            rnn.initial_state_fw: state_fw,
-            rnn.initial_state_bw: state_bw}
+            predictions.append(probabilities_5[1][0])
 
-    probabilities_1, probabilities_3, probabilities_5 = sess.run([tf.nn.top_k(prediction, k=1),
-                                                                  tf.nn.top_k(
-        prediction, k=3),
-        tf.nn.top_k(prediction, k=5)],
-        feed_dict=feed)
-    print("Expected value : ", batch_y - 1)
-    print(probabilities_1[1][0])
-    print(probabilities_3[1][0])
-    print(probabilities_5[1][0])
+            # printResults(
+            #     probabilities_1[1][0], probabilities_3[1][0], probabilities_5[1][0], batch_y - 1)
 
-    return probabilities_5[1][0]
+            # if batch_y - 1 in probabilities_1[1][0]:
+            #     accuracy_1 = accuracy_1 + 1
 
-    # if batch_y - 1 in probabilities_1[1][0]:
-    #     accuracy_1 = accuracy_1 + 1
+            # if batch_y - 1 in probabilities_3[1][0]:
+            #     accuracy_3 = accuracy_3 + 1
 
-    # if batch_y - 1 in probabilities_3[1][0]:
-    #     accuracy_3 = accuracy_3 + 1
+            # if batch_y - 1 in probabilities_5[1][0]:
+            #     accuracy_5 = accuracy_5 + 1
 
-    # if batch_y - 1 in probabilities_5[1][0]:
-    #     accuracy_5 = accuracy_5 + 1
+            # loop_count += 1
 
-    # print("==============================",
+            # if(loop_count % 100 == 0):
+            #     logResult(accuracy_1, accuracy_3, accuracy_5)
+        return predictions
+    #         print("==============================",
     #               "=================================")
     # print('total test data : ', 100)
     # print('accaracy of prediction[0]: ', accuracy_1,
@@ -172,25 +175,3 @@ def predictVideo(video_path):
     #       accuracy_3, 'accuaracy', 100 * accuracy_3 / 100)
     # print('accaracy of prediction[0 -4]: ',
     #       accuracy_5, 'accuaracy', 100 * accuracy_5 / 100)
-
-
-def mainf():
-    total_start_time = time.time()
-    BATCH_SIZE = 1
-    test()
-    total_end_time = time.time()
-    print("===================================================")
-    print("Total Execution Time =", total_end_time - total_start_time)
-    print("===================================================")
-
-
-if __name__ == "__main__":
-    total_start_time = time.time()
-    BATCH_SIZE = 1
-    test()
-    total_end_time = time.time()
-    print("===================================================")
-    print("Total Execution Time =", total_end_time - total_start_time)
-    print("===================================================")
-
-    # 1748.5977

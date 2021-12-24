@@ -1,5 +1,5 @@
 #from google.colab import drive
-from core.test_single import predictVideo
+from core.test_single import predictSign, predictVideo
 from extra import prepare_data
 from core import train_auto_enocder_1
 from core import train_bi_lstm
@@ -23,7 +23,8 @@ drive = GoogleDrive(gauth)
 
 print('start excutioon--------------')
 
-prediction = predictVideo('')
+prediction = predictSign(
+    '/content/drive/MyDrive/data-holistic/videos/bg_test_data/001_002_004.mp4')
 print('PREDICTION :,', prediction)
 # prepare_data.main(drive)
 # train_auto_enocder_1.mainf()
