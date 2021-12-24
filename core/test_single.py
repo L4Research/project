@@ -142,7 +142,6 @@ def predictSign(paths):
             print(probabilities_3[1][0])
             print(probabilities_5[1][0])
 
-            predictions.append(probabilities_5[1][0])
+            predictions.append(probabilities_5[1][0].tolist())
 
         return predictions
-

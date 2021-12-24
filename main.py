@@ -1,5 +1,5 @@
 #from google.colab import drive
-from core.test_single import predictSign, predictVideo
+from core.test_single import predictSign
 from extra import prepare_data
 from core import train_auto_enocder_1
 from core import train_bi_lstm
