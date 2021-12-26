@@ -9,6 +9,10 @@ from models.bi_lstm import Bi_LSTM
 from tensorflow.python.platform import gfile
 from utils import utility, os_utils, cv_utils
 from sklearn.preprocessing import OneHotEncoder
+import json
+
+f = open('../data/data.json')
+data = json.load(f)
 
 
 def get_batch(video_path, all_frame):
@@ -116,9 +120,11 @@ def predictSign(paths):
         state_bw = sess.run(rnn.initial_state_bw)
         loop_count = 0
         predictions = []
+        predictionStr = []
         for video_path in paths:
             batch_x = get_batch(video_path, True)
-            batch_y = get_target_name(video_path)
+            # batch_y = get_target_name(video_path)
+            batch_y = int("001")
 
             encoded_batch = sess.run(stage_2_ip, feed_dict={
                                      stage_1_ip: batch_x})
@@ -142,6 +148,11 @@ def predictSign(paths):
             print(probabilities_3[1][0])
             print(probabilities_5[1][0])
 
-            predictions.append(probabilities_5[1][0].tolist())
+            predictionStr = [data[str(pred)]
+                             for pred in probabilities_5[1][0].tolist()]
+            predictions = probabilities_5[1][0].tolist()
 
-        return predictions
+        return {
+            'predictions': predictions,
+            'tokens': predictionStr
+        }
