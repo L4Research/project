@@ -118,7 +118,7 @@ def train():
         tot_loss = tf.Variable(0.0, tf.float32)
 
         rnn = Bi_LSTM(lstm_size=128, batch_len=BATCH_SIZE,
-                      output_nodes=14, keep_prob=0.85, learning_rate=0.001)
+                      output_nodes=18, keep_prob=0.85, learning_rate=0.001)
         rnn.build_model()
         stage_1_ip, stage_2_ip = get_encoded_embeddings(encoder_logs_path)
         prediction = tf.argmax(rnn.predictions, 1)
@@ -197,8 +197,8 @@ def train():
                 loop_counter += 1
 
                 # previous 150
-                if batch_counter == 150:
-                    total_loss = total_loss / 150
+                if batch_counter == 540:
+                    total_loss = total_loss / 540
                     end_time = time.time()
                     print(
                         "===========================================================================================")
