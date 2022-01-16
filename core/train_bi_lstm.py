@@ -140,7 +140,7 @@ def train():
         iteration = 1
         tf.get_default_graph().finalize()
         for e in range(epochs):
-            sampling_list = random.sample(range(0, 419), sampling_number)
+            sampling_list = random.sample(range(0, 539), sampling_number)
             start_time = time.time()
             total_loss = 0
             validation_accuracy = 0
