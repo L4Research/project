@@ -214,13 +214,13 @@ def test():
 
             print("==============================",
                   "=================================")
-    print('total test data : ', 100)
+    print('total test data : ', 360)
     print('accaracy of prediction[0]: ', accuracy_1,
-          '', 'accuaracy', 100 * accuracy_1 / 100)
+          '', 'accuaracy', 100 * accuracy_1 / 360)
     print('accaracy of prediction[0-2]: ',
-          accuracy_3, 'accuaracy', 100 * accuracy_3 / 100)
+          accuracy_3, 'accuaracy', 100 * accuracy_3 / 360)
     print('accaracy of prediction[0 -4]: ',
-          accuracy_5, 'accuaracy', 100 * accuracy_5 / 100)
+          accuracy_5, 'accuaracy', 100 * accuracy_5 / 360)
 
 
 def mainf():

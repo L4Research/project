@@ -11,7 +11,7 @@ from utils import utility, os_utils, cv_utils
 from sklearn.preprocessing import OneHotEncoder
 import json
 
-f = open('/content/drive/MyDrive/Final_fyp_trims/sentences/02/preprocessed/go.mp4')
+f = open('/content/project/data/data.json')
 data = json.load(f)
 
 
@@ -104,7 +104,7 @@ def predictSign(paths):
 
     with graph.as_default():
         rnn = Bi_LSTM(lstm_size=128, batch_len=BATCH_SIZE,
-                      output_nodes=14, keep_prob=0.0, learning_rate=0.001)
+                      output_nodes=18, keep_prob=0.0, learning_rate=0.001)
         rnn.build_model()
         stage_1_ip, stage_2_ip = get_encoded_embeddings(encoder_logs_path)
         prediction = tf.nn.softmax(rnn.predictions)
