@@ -11,7 +11,7 @@ from utils import utility, os_utils, cv_utils
 from sklearn.preprocessing import OneHotEncoder
 import json
 
-f = open('../data/data.json')
+f = open('/content/drive/MyDrive/Final_fyp_trims/sentences/02/preprocessed/go.mp4')
 data = json.load(f)
 
 
