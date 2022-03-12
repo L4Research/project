@@ -10,7 +10,7 @@ SLASH = "/"
 
 BASE_PROJECT_PATH = "/content/drive/MyDrive/"
 BASE_DATA_PATH = BASE_PROJECT_PATH+"data-holistic/"
-BASE_LOG_PATH = BASE_PROJECT_PATH+"saved_models-holistic_v2/"
+BASE_LOG_PATH = BASE_PROJECT_PATH+"saved_models-holistic_v3/"
 
 # =====================
 #  DATA Relative Path

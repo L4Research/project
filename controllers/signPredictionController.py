@@ -3,10 +3,10 @@ from flask import request, jsonify
 from core.test_single import predictSign
 
 
-@app.route('/foo', methods=['POST'])
-def foo():
-    data = request.json
-    return jsonify(data)
+# @app.route('/foo', methods=['POST'])
+# def foo():
+#     data = request.json
+#     return jsonify(data)
 
 
 @app.route('/predict', methods=['POST'])
